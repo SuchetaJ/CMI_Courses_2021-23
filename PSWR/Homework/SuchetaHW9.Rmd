@@ -1,0 +1,200 @@
+---
+title: "PSWR"
+author: "Sucheta"
+date: "30/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,fig=T}
+
+#Solution 1.a)
+
+var_phat = function(p,n){
+  return(p*(1-p)/n)
+}
+
+sd_phat = function(p,n){
+  return((p*(1-p)/n)^0.5)
+}
+
+#solution 1.b)
+
+#SD(phat) = 0.01 = (p(1-p)/n)^0.5
+#So, (0.01)^2 = p(1-p)/n
+#Therefore, n = p(1-p)/(0.01)^2
+
+sam_n = function(p){
+  return(p*(1-p)/(0.01)^2)
+}
+prob = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9)
+n_prob = rep(NA,length(prob))
+for (i in 1:length(prob)){
+  n_prob[i]=sam_n(prob[i])
+}
+plot(prob,n_prob,ylab='value of n', xlab='p',pch=20)
+```
+
+
+```{r,fig=T}
+#solution 1.c)
+
+#phat depends on the occurrence and non occurrence of an event A. Let 1 denote the
+#occurrence(probability = p) and 0 denote the non occurrence(probability = 1-p).
+x = c(0,1)
+
+phat = function(sim_size,p,n){
+  phat_sam = rep(NA,sim_size)
+  for (i in 1:sim_size){
+    z = sample(x,n,replace=TRUE,prob=c(1-p,p))
+    count = sum(z==1)
+    phat_sam[i]=count/n
+  }
+  return(phat_sam)
+}
+
+#Solution c.i)
+
+n=500
+sim_size = 1000
+p=c(0.01,0.1, 0.25, 0.5, 0.75, 0.9, 0.99)
+sd1 = rep(NA,length(p))
+for (i in 1:length(p)){
+  phat1 = phat(sim_size,p[i],n)
+  sd1[i]=sd(phat1)
+}
+sd1
+
+#Solution1.c.ii)
+n_sd = function(p,sd){
+  return(p*(1-p)/(sd)^2)
+}
+
+sd2 = rep(NA,length(p))
+for (i in 1:length(p)){
+  n2 = n_sd(p[i],sd1[i])
+  phat2 = phat(sim_size,p[i],n2)
+  sd2[i]=sd(phat2)
+}
+sd2
+
+df = data.frame(p,sd1)
+cbind(df,sd2)
+library(ggplot2)
+ggplot(df,aes(x=p))+geom_line(aes(y=sd1,colour='sd1'),size=1)+
+  geom_line(aes(y=sd2,colour='sd2'),size=1)+
+  ylab("Standard Deviation of Sample Proportion")
+```
+
+```{r,fig=T}
+
+#Solution 2.b and 2.c)
+
+n = c(100,500,1000)
+mean=c()
+var = c()
+diff_mean = c()
+diff_var=c()
+set.seed(11)
+df_pois = function(lambda){
+  for (j in n){
+    pois = rpois(j,lambda)
+    mean = append(mean,mean(pois))
+    var = append(var,var(pois))
+    diff_mean = append(diff_mean,lambda-mean(pois))
+    diff_var=append(diff_var,lambda-var(pois))
+  }
+  return(data.frame(n,mean,var,diff_mean,diff_var))
+}
+
+#lambda = 10
+df_pois(10)
+#As the value of n is increasing the difference between the sample mean and true 
+#mean and the sample variance and true variance is decreasing.
+#we can see as we are double the value of n, our error is getting almost halved.
+true_mean = 10
+true_var = 10
+mean_sam = mean(df_pois(10)$mean)
+mean_var = mean(df_pois(10)$var)
+print(paste("The expectation of sample mean is : ",mean_sam))
+print(paste("The expectation of sample variance is : ",mean_var))
+
+#The expectation of sample mean and variance, differ by 0.1 and 
+#0.35 respectively from the true mean = 10
+
+#lambda = 20
+df_pois(20)
+#As the value of n increases the difference between the sample mean and true 
+#mean and the sample variance and true variance decreases at first step but then
+#again increases. But overall the difference is reduced on increasing n.
+true_mean = 20
+true_var = 20
+mean_sam = mean(df_pois(20)$mean)
+mean_var = mean(df_pois(20)$var)
+print(paste("The expectation of sample mean is : ",mean_sam))
+print(paste("The expectation of sample variance is : ",mean_var))
+
+#The expectation of sample mean and variance, differ by 0.1 and 
+#0.36 respectively from the true mean = 20
+
+
+#lambda = 50
+df_pois(50)
+#As the value of n increases the difference between the sample mean and true 
+#mean and the sample variance and true variance decreases initially. But, then
+#it increases very largely, indicating not to increase n for lambda=50.
+
+true_mean = 50
+true_var = 50
+mean_sam = mean(df_pois(50)$mean)
+mean_var = mean(df_pois(50)$var)
+print(paste("The expectation of sample mean is : ",mean_sam))
+print(paste("The expectation of sample variance is : ",mean_var))
+
+#The expectation of sample mean and variance, differ by 0.26 and 
+#3.14 respectively from the true mean = 50
+
+
+#We can conclude that for larger values of lambda, increasing the value of n
+#increases the difference between the sample mean and true mean and the 
+#sample variance and true variance. We also observe, The expectation of sample 
+#mean and variance are close to lambda.
+
+
+
+
+
+
+#Solution 3.b)
+
+N = c(50, 100, 200, 300, 400, 500)
+m = 50
+r = 20
+exp = rep(NA,length(N))
+var = rep(NA,length(N))
+for (i in length(N)){
+  hyp_x = rhyper(1000,m,N[i]-50,20)
+  N_hat = 1000/hyp_x
+  print(N_hat)
+  exp[i]=mean(N_hat)
+  var[i]= var(N_hat)
+}
+
+df1 = data.frame(N,exp)
+df = cbind(df1,var)
+library(ggplot2)
+ggplot(df,aes(x=N))+geom_line(aes(y=exp,colour='exp'))+geom_line(aes(y=var,colour='var'))
+
+
+
+
+
+
+
+
+
+
+```

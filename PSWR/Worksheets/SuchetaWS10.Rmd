@@ -1,0 +1,149 @@
+---
+title: "SuchetaWS10"
+author: "Sucheta"
+date: "25/11/2021"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+#Solution 1.a
+
+library(Rlab)
+
+x_bern = rbern(100,1/3) #generates 100 iid Bernoulli(1/3)
+
+#Solution 1.b 
+
+runningmean = function (x,N){  #function to calculate the mean
+  y = sample(x,N, replace=TRUE)
+  c = cumsum(y)
+  n = 1:N
+  c/n
+}
+
+#Sample with n = 100, p =1/3
+n=100
+x_bern = rbern(n,1/3) #generates n iid Bernoulli(1/3)
+u1 = runningmean(x_bern, n)
+rangen=1:n
+plot(u1~rangen, type ='l',ylim = c(0,1))
+abline(h=1/3, col=2)
+
+
+#solution 1.c
+
+replicate(15,lines(runningmean(x_bern, 100)~rangen, type="l",lwd=2, col=rgb(runif(3),runif(3),runif(3))))
+
+#solution 1.d
+
+#Sample with n = 100, p =0.001
+x_bern2 = rbern(n,0.001)  #generates n iid Bernoulli(0.001)
+u2 = runningmean(x_bern2, n)
+rangen=1:n
+plot(u2~rangen, type ='l')
+abline(h=0.001, col=2)
+
+replicate(15,lines(runningmean(x_bern2, 100)~rangen, type="l",lwd=2, col=rgb(runif(3),runif(3),runif(3))))
+
+#Sample with n = 100, p = 0.5
+x_bern3 = rbern(n,0.5)   #generates n iid Bernoulli(0.5)
+u3 = runningmean(x_bern3, n)
+rangen=1:n
+plot(u3~rangen, type ='l')
+abline(h=0.5, col=2)
+
+replicate(15,lines(runningmean(x_bern3, 100)~rangen, type="l", col=rgb(runif(3),runif(3),runif(3))))
+
+#Sample with n = 100, p =0.99
+x_bern4 = rbern(n,0.99)   #generates n iid Bernoulli(0.99)
+u4 = runningmean(x_bern4, n)
+rangen=1:n
+plot(u4~rangen, type ='l')
+abline(h=0.99, col=2)
+
+replicate(15,lines(runningmean(x_bern4, 100)~rangen, type="l",lwd=2, col=rgb(runif(3),runif(3),runif(3))))
+
+
+#Solution 2.a
+sum_fun = function(a,b,f,n){
+  x_unif = runif(n,min=a,max=b) #uniformly distributed random variables
+  f_x = sapply(x_unif,f) #apply the function to each random variable
+  (b-a)*sum(f_x)/n  #calculate the left hand side of the given equation
+}
+
+#Solution 2.b
+
+a=0 #lower bound
+b=7 #upper bound
+n=400
+f = function(x){  #given function
+  (16+sin(x))/(x^2+4)
+}
+
+sum_f = sum_fun(a,b,f,n)
+print(paste("The approximate value of the integration is :",sum_f))
+
+#Solution 2.c
+
+sum_f1=rep(NA,100) 
+for (i in 1:100){  #repeat 100 times
+  x_unif = runif(n,min=a,max=b)
+  f_x = sapply(x_unif,f)
+  sum_f1[i] = (b-a)*sum(f_x)/n
+}
+mean_sum = mean(sum_f1)
+print(paste("The approximate value comes as: ",mean_sum))
+
+#Solution 2.d
+
+int_f= integrate(f,a,b)
+error= mean_sum - int_f$value
+print(paste("The value of the integral is: ",int_f$value))
+print(paste("The integral and the sum differ by: ",error))
+
+#We can see that the two answers are very close to each other.
+
+
+#solution 3.a
+
+x_pois = rpois(500,10) #generating samples from distribution function
+print(x_pois)
+
+x_sim_pois = rep(0,500)
+for (i in 1:500){   #generating samples using runif
+  sum = 0
+  while(sum<1){
+    u_pois = runif(1,min=0,max=1)
+    sum = sum +(-(1/10)*log(u_pois))
+    x_sim_pois[i]=x_sim_pois[i]+1
+  }
+}
+print(x_sim_pois[11:15])
+
+#solution 3.b
+
+u = runif(500,min=0,max=1)   #generating samples using runif
+x_sim = (2*u)^0.5
+print(x_sim[1:5])
+
+#solution 3.c
+
+norm_dist = rnorm(500,mean =3,sd =2) #generating samples from distribution function
+
+n = 500  #Generating samples using runif
+u1 = runif(n, min = 0, max = 1)
+u2 = runif(n, min = 0, max = 1)
+x1 = (3+sqrt(-8*log(u1)))*cos(8*pi*u2)
+x2 = (3+sqrt(-8*log(u1)))*sin(8*pi*u2)
+print(x1[1:5])
+print(x2[1:5])
+
+
+```

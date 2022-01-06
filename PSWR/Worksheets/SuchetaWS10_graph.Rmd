@@ -1,0 +1,44 @@
+---
+title: "PSWR"
+author: "Sucheta"
+date: "03/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,fig=T}
+#Solution 1
+
+set.seed(40)
+x = as.integer((runif(1,min=1,max=5)))
+print(x)
+
+#Solution 2
+print(x/6)
+
+#Solution 4
+m= read.csv('D:\\Sucheta\\CMI\\PSWR\\matrix.csv', header = FALSE)
+m1 = data.matrix(m)
+m1
+
+#Solution 5
+library(igraph)
+g_10=graph.adjacency(adjmatrix=m1,mode="undirected",weighted=TRUE,diag=FALSE)
+plot(g_10,main ='G(10,1/2)')
+
+```
+
+```{r}
+total_edges = sum(m)/2
+prob_edge = total_edges/45
+
+
+#The graph has 20 edges, out of the total 45 undirected edges possible.
+#We can see that we get a probability of approx 0.44 of having an edge between 
+#any two distinct vertices of a graph, this is approximately close to the true 
+#prob, that is x/6 = 1/2.
+
+```

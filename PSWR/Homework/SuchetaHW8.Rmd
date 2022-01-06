@@ -1,0 +1,233 @@
+---
+title: "SuchetaHW8"
+author: "Sucheta"
+date: "24/11/2021"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,fig = T}
+
+#Solution 1
+
+#100 trials of Beta(10,2)
+
+#Sample size 5
+n = 5  #Sample Size
+sim.size = 100    #number of trials
+mean1 = rep(NA,n)
+for (i in 1:sim.size){   #To generate beta distribution
+  beta1 = rbeta(n,10,2)
+  mean1[i] = mean(beta1)
+}
+par(mfrow=c(1,2))
+hist(mean1,col='skyblue',main = paste("Histogram for n:",n),
+         xlab=paste("Beta(10,2) Sample of size:",n)) #Plot the histogram
+qqnorm(mean1,pch=20)   #QQ plot to check if follow normal distribution
+qqline(mean1,col='red')
+
+
+#The data is left skewed which can be seen from the histogram.Also, from
+#the QQ plot we can infer that the data is away from the normal distribution.
+
+#Sample size 50
+n= 50  #Sample Size
+sim.size = 100    #number of trials
+mean2 = rep(NA,n)
+for (i in 1:sim.size){  #To generate beta distribution
+  beta2 = rbeta(n,10,2)
+  mean2[i] = mean(beta2)
+}
+
+par(mfrow=c(1,2))
+hist(mean2,col='skyblue',main = paste("Histogram for n:",n),
+         xlab=paste("Beta(10,2) Sample of size:",n)) #Plot the histogram
+qqnorm(mean2,pch=20)   #QQ plot to check if follow normal distribution
+qqline(mean2,col='red')
+
+
+#The data is not skewed but it is not symmetric which can be seen from the histogram.
+#Also, from the QQ plot we can infer that the some of the boundary points
+# of the data are away from the normal distribution.
+
+
+#Sample size 500
+n = 500  #Sample Size
+sim.size = 100    #number of trials
+mean3 = rep(NA,n)
+for (i in 1:sim.size){  #To generate beta distribution
+  beta3 = rbeta(n,10,2)
+  mean3[i] = mean(beta3)
+}
+
+par(mfrow=c(1,2))
+hist(mean3,col='skyblue',main = paste("Histogram for n:",n),
+         xlab=paste("Beta(10,2) Sample of size:",n)) #Plot the histogram
+qqnorm(mean3,pch=20)   #QQ plot to check if follow normal distribution
+qqline(mean3,col='red')
+
+
+
+#The data is not skewed and is also symmetric which can be seen from the histogram.
+#Also, from the QQ plot we can infer that the some of the boundary points of
+#the data are still away from the normal distribution, but it is more 
+#"normal" than the previous samples.
+
+
+#100 trials of Beta(10,10) 
+
+#Sample size 5
+n = 5  #Sample Size
+sim.size = 100    #number of trials
+mean1 = rep(NA,n)
+for (i in 1:sim.size){   #To generate beta distribution
+  beta1 = rbeta(n,10,10)
+  mean1[i] = mean(beta1)
+}
+par(mfrow=c(1,2))
+hist(mean1,col='pink',main = paste("Histogram for n:",n),
+         xlab=paste("Beta(10,10) Sample of size:",n)) #Plot the histogram
+qqnorm(mean1,pch=20)   #QQ plot to check if follow normal distribution
+qqline(mean1,col='red')
+
+
+#The data is not symmetric which can be seen from the histogram. Also, from
+#the QQ plot we can infer that the data is away from normal distribution
+#since most of the points are not on the straight line
+
+#Sample size 50
+n= 50  #Sample Size
+sim.size = 100    #number of trials
+mean2 = rep(NA,n)
+for (i in 1:sim.size){  #To generate beta distribution
+  beta2 = rbeta(n,10,2)
+  mean2[i] = mean(beta2)
+}
+
+par(mfrow=c(1,2))
+hist(mean2,col='pink',main = paste("Histogram for n:",n),
+         xlab=paste("Beta(10,10) Sample of size:",n)) #Plot the histogram
+qqnorm(mean2,pch=20)   #QQ plot to check if follow normal distribution
+qqline(mean2,col='red')
+
+##The data is left skewed which can be seen from the histogram. Also, from
+#the QQ plot we can infer that the many points of the
+#data are away from normal distribution.
+
+
+#Sample size 500
+n = 500  #Sample Size
+sim.size = 100    #number of trials
+mean3 = rep(NA,n)
+for (i in 1:sim.size){  #To generate beta distribution
+  beta3 = rbeta(n,10,2)
+  mean3[i] = mean(beta3)
+}
+
+par(mfrow=c(1,2))
+hist(mean3,col='pink',main = paste("Histogram for n:",n),
+         xlab=paste("Beta(10,10) Sample of size:",n)) #Plot the histogram
+qqnorm(mean3,pch=20)   #QQ plot to check if follow normal distribution
+qqline(mean3,col='red')
+
+
+##The data is not skewed but it isn't symmetric which can be seen from the histogram. 
+#Also, from the QQ plot we can infer that the most of the points of the
+#data are close normal distribution since they lie on the straight line.
+
+
+#According to the Central Limit theorem, as we increase the sample size, 
+#our distribution must tend towards a normal distribution. In both the cases
+#we can see as sample size increases the histograms become less skewed and more 
+#symmetric. The points of QQ plot also start coinciding with the the normal line.
+
+
+#Solution 2.a
+
+pois_mean = rep(NA,100)
+for (i in 1:100){   #Generate a Poisson(1) distribution
+  pois_mean[i] = mean(rpois(500,1))
+}
+
+#Solution 2.b
+
+sd_p = sd(pois_mean) #Standard Deviation of the sample
+cifn = function(x, alpha=0.95){ #function to find Confidence Interval
+  z = qnorm( (1-alpha)/2, lower.tail=FALSE)
+  sdx = sd_p*sqrt(1/length(x))
+  c(mean(x) - z*sdx, mean(x) + z*sdx)
+}
+
+cidata = sapply(pois_mean,cifn) #apply the function to each element
+print(cidata)
+
+#Solution 2.c
+#The true mean= lambda = 1
+TRUEIN = (cidata[1,]-1)*(cidata[2,]-1)<0 #Check whether true mean = 1 lies in the confidence interval
+tab = table(TRUEIN)
+print("The number of times true mean lies in the intervals:")
+print(tab[2][1])
+
+
+
+#Solution 3.a
+
+bang_rain =read.csv("D:\\Sucheta\\CMI\\PSWR\\Homework\\BangaloreRain.csv")
+par(mfrow=c(1,2))
+for (i in 2:13){  #plot the histogram
+  hist(bang_rain[[i]],main=paste("Histogram, Month:",i-1), xlab = paste("Month:",i-1))
+}
+par(mfrow=c(1,2))
+for (i in 2:13){ #plot QQ plot for each month
+  qqnorm(bang_rain[[i]],pch=20, main=paste("QQ Plot for month:",i-1))
+  qqline(bang_rain[[i]],col='red',lwd=2)
+}
+
+#On looking at the histogram for months Jan to Aug and Nov to Dec, 
+#the data is right skewed, hence it is not normally distributed. 
+#For months September and October, The histogram is not skewed. Though the histogram 
+#is less symmetric and some points do not lie on the normal line,
+#rainfall for Sept and Oct are more normally distributed than the others.
+
+
+#Solution 3.b
+
+total = rep(0,length(bang_rain[,1])) 
+for (i in 1:length(bang_rain[,1])){   #Find the total rainfall for each year
+  total[i] = sum(bang_rain[i,][2:13])
+}
+print("The yearly total rainfall for each year is:")
+print(total)
+
+#solution 3.c
+
+par(mfrow=c(1,1))
+hist(total,main='Histogram of annual rainfall',xlab='Total Rainfall')
+#The distribution of the yearly total rainfall is not completely symmetric
+#so it is still near a Normal Distribution
+
+#Solution 3.d
+
+sd = sd(total)  #Standard deviation of annual rainfall
+cifn = function(x, alpha=0.95){   #function to find Confidence Interval
+  z = qnorm( (1-alpha)/2, lower.tail=FALSE)
+  root = sqrt(1/length(x))
+  sdx = sd*root
+  c(mean(x) - z*sdx, mean(x) + z*sdx)
+}
+
+ci_total = cifn(total)
+
+print(paste("The lower bound of confidence interval is:",ci_total[1]))
+print(paste("The lower bound of confidence interval is:",ci_total[2]))
+
+
+```
+
+
+
