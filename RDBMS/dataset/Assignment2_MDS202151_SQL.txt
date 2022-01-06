@@ -1,0 +1,94 @@
+create database assignment2;   #creating a new database
+use assignment2;
+show tables;   #after importing all the tables show the tables
+create table stock as (select * from icicibank);  #add rows from the icicibank table
+select * from stock;  #look at table stock
+
+insert into stock (symbol,date,prev_close,open_price,high_price,low_price,close_price)  #add rows from the apollo table
+select symbol,date,`Prev Close`,`Open Price`,`High Price`,`Low Price`,`Close Price` from apollo;
+
+insert into stock (symbol,date,prev_close,open_price,high_price,low_price,close_price)   #add rows from the reliance table
+select symbol,date,`Prev Close`,`Open Price`,`High Price`,`Low Price`,`Close Price` from reliance;
+
+insert into stock (symbol,date,prev_close,open_price,high_price,low_price,close_price)   #add rows from the suntv table
+select symbol,date,prev_close,open_price,high_price,low_price,close_price from suntv;
+
+insert into stock (symbol,date,prev_close,open_price,high_price,low_price,close_price)  #add rows from the indigo table
+select symbol,date,`Prev Close`,`Open Price`,`High Price`,`Low Price`,`Close Price` from indigo;
+
+select * from stock;
+#Check that there are no null values in our table to avoid inconsistency
+select count(*) from stock where Symbol is null;
+select count(*) from stock where Date is null;
+select count(*) from stock where Prev_Close is null; 
+select count(*) from stock where Open_Price is null;
+select count(*) from stock where High_Price is null;
+select count(*) from stock where Low_Price is null;
+select count(*) from stock where Close_Price is null;
+
+#Solution Task1
+select symbol,count(symbol) as frequency from stock group by symbol; #counts the number of rows in each company's data
+select count(*) as total_rows from stock;   #count the total number of rows in table stock
+
+#Solution Task2
+
+#To find the highest gain we assume that the buyer buys shares at the lowest price on the 2nd of Nov,2017 and will sell it at the highest price on each day.
+#So, we shall first find the maximum among all the values of high_price of each company and then compare it with the low_price of it's share on 2-Nov-2017.
+select symbol,highest_price,cost_price,round((highest_price/cost_price-1)*100,2) as percent_gain from (select a.symbol,max(a.high_price) as highest_price, 
+b.low_price as cost_price from stock a,stock b where a.symbol=b.symbol and b.date='2-Nov-17' group by a.symbol) as diff;  #finding the overall highest 
+																									#possible percentage gain for each company
+
+#To find the highest loss we assume that the buyer buys shares at the highest price on the 2nd of Nov,2017 and will sell it at the lowest price on each day.
+#So, we shall first find the minimum among all the values of low_price of each company and then compare it with the _prighice of it's share on 2-Nov-2017.
+select symbol,lowest_price,cost_price,round((1-lowest_price/cost_price)*100,2) as percent_loss from (select a.symbol,min(a.low_price) as lowest_price, 
+b.high_price as cost_price from stock a,stock b where a.symbol=b.symbol and b.date='2-Nov-17' group by a.symbol) as diff; #finding the overall 
+																								#highest possible percentage loss for each company
+
+#Solution Task3
+
+#we first rank each company as per their percentage gain each day and then take the top 5 ranked entries for each company
+select * from (select symbol,date,(Close_Price/Prev_Close-1)*100 as daily_gain,row_number() over 
+(partition by symbol order by (Close_Price/Prev_Close-1)*100 desc) as stock_rank from stock) ranks where stock_rank<=5;
+
+#For Apollo the top fives Days were: 12-Sep-19,13-Aug-18,3-Jun-19,16-Aug-19,15-Nov-18
+#For ICICI the top five days were: 22-Mar-19,29-Oct-18,20-Sep-19,23-Sep-19,8-May-2018
+#For Indigo the top five days were: 14-Nov-18,25-Oct-18,20-Mar-19,30-Oct-19,16-Apr-19
+#For Reliance the top five days were: 13-Aug-19,22-Mar-19,20-Sep-19,8-Oct-18,20-May-19
+#For SunTV the top fives days were: 14-May-18,11-Feb-19,20-Sep-19,23-Sep-19,8-Feb-18
+
+#Solution Task4
+
+#stocks closing higher than previous day's close must have the difference as positive
+select symbol,date,prev_close,close_price, close_price-prev_close as diff from stock where close_price-prev_close>0; #shows certain columns corresponding to the date
+select date from stock where close_price-prev_close>0; #shows the dates when price of the share of a company was higher than the previous day
+
+#stocks closing lower than previous day's close must have the difference as negative
+select symbol,date,prev_close,close_price, close_price-prev_close as diff from stock where close_price-prev_close<0;  #shows certain columns corresponding to the date
+select date from stock where close_price-prev_close<0; #shows the dates when price of the share of a company was lower than the previous day
+
+#Solution Task5
+
+select * from stock;
+
+#Shows the entries with profit in descending order.
+select symbol,first_date,low_price,last_date,high_price,high_price-low_price as diff from (select a.symbol,a.date as first_date,a.low_price,b.date as last_date,b.high_price 
+from stock a, stock b  where a.date in ('1-Jan-18','2-Jan-18','4-Jan-18','5-Jan-18') 
+and b.date in ('24-Jan-18','25-Jan-18','29-Jan-18','30-Jan-18')) as t1 order by diff desc;
+#From the table it is prominent that the top entries are of icicibank, indicating higher profits from the shares of icicibank.
+#Also, the selling dates of the top 5 entries are same that is 25th of January,2018.
+
+#Now let's look at the entry having the maximum profit per share
+select symbol,first_date,low_price,last_date,high_price,high_price-low_price as diff from (select a.symbol,a.date as first_date,a.low_price,b.date as last_date,b.high_price 
+from stock a, stock b  where a.date in ('1-Jan-18','2-Jan-18','4-Jan-18','5-Jan-18') 
+and b.date in ('24-Jan-18','25-Jan-18','29-Jan-18','30-Jan-18')) as t1 order by diff desc limit 1;
+#We get that icicibank has the maximum possible profit when investment is made on the 2nd of January, 2018 and the shares are sold on
+#the 25th of January, 2018. So the best day to invest in the first week of 2018 is 2-Jan-2021 and best day to sell in the last week is 
+#25-Jan-2018. The stock that would have given the maximum profit is icicibank of Rs.971.5 per share.
+
+#we shall find the profit earned on investing rs.2000.
+select symbol,first_date,low_price,last_date,high_price,high_price-low_price as diff, floor(2000/low_price) as number_of_shares,
+floor(2000/low_price)*(high_price-low_price) as profit  from (select a.symbol,a.date as first_date,a.low_price,b.date as last_date,b.high_price 
+from stock a, stock b  where a.date in ('1-Jan-18','2-Jan-18','4-Jan-18','5-Jan-18') 
+and b.date in ('24-Jan-18','25-Jan-18','29-Jan-18','30-Jan-18')) as t1 order by diff desc limit 1;
+#We can see on investing rs.2000 we are able to buy 6 shares of icicibank which gives us a profit of Rs.5829 total
+#if we buy it on 2-Jan-2018 and sell it on 25-Jan-2018.
